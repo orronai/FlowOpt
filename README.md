@@ -1,5 +1,5 @@
 [![Zero-Shot Image Editing](https://img.shields.io/badge/zero%20shot-image%20editing-Green)]([https://github.com/topics/video-editing](https://github.com/topics/text-guided-image-editing))
-[![Python 3.8.10](https://img.shields.io/badge/python-3.8.10+-blue?logo=python&logoColor=white)](https://www.python.org/downloads/release/python-3810/)
+[![Python 3.8.10](https://img.shields.io/badge/python-3.12.11+-blue?logo=python&logoColor=white)](https://www.python.org/downloads/release/python-3810/)
 [![torch](https://img.shields.io/badge/torch-2.0.0+-red?logo=pytorch&logoColor=white)](https://pytorch.org/)
 [![Matplotlib](https://img.shields.io/badge/matplotlib-3.7.1+-yellow?logo=plotly&logoColor=white)](https://pypi.org/project/matplotlib/3.7.1)
 
