@@ -6,7 +6,7 @@
 
 # FlowOpt: Fast Optimization Through Whole Flow Processes For Training-Free Editing
 
-![Teaser](assets/teaser.png)
+![Teaser](assets/teaser.jpg)
 
 **This is the anonymous submission version. The final version will be published after acceptance (and after code-cleanup).**
 
