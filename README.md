@@ -14,7 +14,7 @@
 ### 1. Clone the repo
 
 ```bash
-git clone ###link###
+git clone https://github.com/orronai/FlowOpt.git
 cd FlowOpt
 ```
 
