@@ -1,0 +1,12 @@
+- 
+  exp_name: "FlowOpt_FLUX"
+  dataset_yaml: yaml_files/edits.yaml
+  model_type: "FLUX"
+  T_steps: 15
+  n_max: 2
+  max_iterations: 8
+  eta: 0.0025
+  src_guidance_scale: 1.0
+  tar_guidance_scale: 3.5
+  seed: 1024
+  inversion: false

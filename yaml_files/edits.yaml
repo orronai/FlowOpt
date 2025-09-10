@@ -1,0 +1,436 @@
+-
+    init_img:  dataset/bear.png
+
+    source_prompt: A large brown bear walking through a stream of water.
+        The stream appears to be shallow, as the bear is able to walk through it without any difficulty.
+
+    target_prompts:
+    - A large black bear walking through a stream of water.
+        The stream appears to be shallow, as the black bear is able to walk through it without any difficulty.
+    - A large brown bear in pixar style walking through a stream of water.
+        The stream appears to be shallow, as the bear is able to walk through it without any difficulty.
+    - A large brown bear in studio ghibli style walking through a stream of water.
+        The stream appears to be shallow, as the bear is able to walk through it without any difficulty.
+
+    target_codes:
+    - 1_black_bear
+    - 2_pixar_bear
+    - 3_studio_ghibli_bear
+
+-
+    init_img:  dataset/cake.png
+
+    source_prompt: A three-layer cake with white frosting, placed on a
+      wooden table. The cake is adorned with a variety of fruits.
+      The cake is presented on a white plate.
+
+    target_prompts:
+    - A three-layer cake with white frosting, placed on a
+      wooden table. The cake is adorned with a variety of berries.
+      The cake is presented on a white plate.
+    - A three-layer wedding cake with white frosting, placed on a
+      wooden table. The cake is adorned with a lot of strawberries.
+      The cake is presented on a white plate.
+
+    target_codes:
+    - 1_berries
+    - 2_strawberries
+
+-
+    init_img:  dataset/cake_strawberry.png
+
+    source_prompt: A slice of cake with white frosting and a strawberry on top.
+
+    target_prompts:
+    - A slice of oreo cake with white frosting and a strawberry on top.
+    - A slice of matcha cake with white frosting and a strawberry on top.
+
+    target_codes:
+    - 1_oreo
+    - 2_matcha
+
+-
+    init_img:  dataset/cat.png
+
+    source_prompt: A small, fluffy kitten sitting in a grassy field. The
+      kitten is positioned in the center of the scene, surrounded by a field.
+      The kitten appears to be looking at something
+      in the field.
+
+    target_prompts:
+    - A small puppy sitting in a grassy field. The
+      puppy is positioned in the center of the scene, surrounded by a field.
+      The puppy appears to be looking at something
+      in the field.
+    - A small lion cub sitting in a grassy field. The
+      lion cub is positioned in the center of the scene, surrounded by a field.
+      The lion cub appears to be looking at something
+      in the field.
+    - A small tiger cub sitting in a grassy field. The
+      tiger cub is positioned in the center of the scene, surrounded by a field.
+      The tiger cub appears to be looking at something
+      in the field.
+    - A small bear cub sitting in a grassy field. The
+      bear cub is positioned in the center of the scene, surrounded by a field.
+      The bear cub appears to be looking at something
+      in the field.
+    - A small wooden sculpture of a kitten sitting in a grassy field. The
+      wooden sculpture of a kitten is positioned in the center of the scene, surrounded by a field.
+      The wooden sculpture of a kitten appears to be looking at something in the field.
+    - A small kitten made out of lego bricks is sitting in a grassy field. The
+      kitten is positioned in the center of the scene, surrounded by a field.
+      The kitten appears to be looking at something
+      in the field.
+    - A small kitten in realistic disney style sitting in a grassy field. The
+      kitten is positioned in the center of the scene, surrounded by a field.
+      The kitten appears to be looking at something
+      in the field.
+
+    target_codes:
+    - 1_puppy
+    - 2_lion_cub
+    - 3_tiger_cub
+    - 4_bear_cub
+    - 5_wooden_sculpture
+    - 6_lego
+    - 7_disney
+
+-
+    init_img:  dataset/corgi.png
+
+    source_prompt: A brown and white dog sitting on a dirt ground near
+      a body of water. The dog appears to be enjoying the outdoors, possibly in a park.
+      The dog is wearing a red collar.
+      In the background, there are a few trees, providing a natural setting for the dog''s
+      outdoor adventure.
+
+    target_prompts:
+    - A wooden sculpture of a brown and white dog made sitting on a dirt ground near
+      a body of water. 
+      The wooden sculpture of a dog appears to be enjoying the outdoors, possibly in a park.
+      In the background, there are a few trees, providing a natural setting for the wooden sculpture''s
+      outdoor adventure.
+
+    target_codes:
+    - 1_wooden_sculpture
+
+-
+    init_img:  dataset/dog.png
+
+    source_prompt: A small black and brown dog sitting on a lush green field.
+
+    target_prompts:
+    - A small black and brown crochet dog sitting on a lush green field.
+    - A small black and brown sculpture of a dog sitting on a lush green field.
+    - A small black and brown dog made out of lego bricks sitting on a lush green field.
+    - A small black and brown dog in pixar style sitting on a lush green field.
+    - A small black and brown dog in realistic disney style sitting on a lush green field.
+
+    target_codes:
+    - 1_crochet
+    - 2_sculpture
+    - 3_lego_bricks
+    - 4_pixar
+    - 5_disney
+
+-
+    init_img:  dataset/dog_snow.png
+
+    source_prompt: A German Shepherd dog standing in a snowy field.
+
+    target_prompts:
+    - A wooden sculpture of a dog standing in a snowy field.
+    - A Husky dog standing in a snowy field.
+    - A baby deer standing in a snowy field.
+
+    target_codes:
+    - 1_wooden_sculpture
+    - 2_husky
+    - 3_baby_deer
+
+-
+    init_img: dataset/geese.png
+
+    source_prompt: A flock of geese flying together in the sky. There
+        are several geese, spread across the scene, with some flying higher and others
+        lower. The geese are flying in a cloudy sky.
+
+    target_prompts:
+    - A flock of flamingos flying together in the sky. There
+        are several flamingos, spread across the scene, with some flying higher and others
+        lower. The flamingos are flying in a cloudy sky.
+    - A flock of black swans flying together in the sky. There
+        are several black swans, spread across the scene, with some flying higher and others
+        lower. The black swans are flying in a cloudy sky.
+    - A flock of origami geese flying together in the sky. There
+        are several origami geese, spread across the scene, with some flying higher and others
+        lower. The origami geese are flying in a cloudy sky.
+    - A flock of geese made out of lego bricks flying together in the sky. There
+        are several geese, spread across the scene, with some flying higher and others
+        lower. The geese are flying in a cloudy sky.
+
+    target_codes:
+    - 1_flamingos
+    - 2_black_swans
+    - 3_origami_geese
+    - 4_lego_geese
+
+-
+    init_img:  dataset/horse.png
+
+    source_prompt: A white horse running through a grassy field. The horse appears to be
+        galloping, creating a sense of motion and energy in the image.
+        The field is surrounded by a forest, with trees visible in the background. The overall
+        atmosphere of the scene is lively and dynamic, capturing the horse''s freedom and
+        grace as it moves through the natural environment.
+
+    target_prompts:
+      - A white unicorn running through a grassy field. The unicorn appears to be
+        galloping, creating a sense of motion and energy in the image.
+        The field is surrounded by a forest, with trees visible in the background. The overall
+        atmosphere of the scene is lively and dynamic, capturing the unicorn''s freedom and
+        grace as it moves through the natural environment.
+      - A zebra running through a grassy field. The zebra appears to be
+        galloping, creating a sense of motion and energy in the image.
+        The field is surrounded by a forest, with trees visible in the background. The overall
+        atmosphere of the scene is lively and dynamic, capturing the zebra''s freedom and
+        grace as it moves through the natural environment.
+
+    target_codes:
+    - 1_unicorn
+    - 2_zebra
+
+-
+    init_img:  dataset/iguana.png
+
+    source_prompt: A large orange lizard sitting on a rock near the
+      ocean. The lizard is positioned in the center of the scene, with the ocean waves
+      visible in the background. The rock is located close to the water, providing a picturesque
+      setting for the lizard''s resting spot.
+
+    target_prompts:
+    - A large frog sitting on a rock near the
+      ocean. The frog is positioned in the center of the scene, with the ocean waves
+      visible in the background. The rock is located close to the water, providing a picturesque
+      setting for the frog''s resting spot.
+    - A large dragon sitting on a rock near the
+      ocean. The dragon is positioned in the center of the scene, with the ocean waves
+      visible in the background. The rock is located close to the water, providing a picturesque
+      setting for the dragon''s resting spot.
+    - A large lizard made out of lego bricks sitting on a rock near the
+      ocean. The lizard is positioned in the center of the scene, with the ocean waves
+      visible in the background. The rock is located close to the water, providing a picturesque
+      setting for the lizard''s resting spot.
+    - A large crochet lizard sitting on a rock near the
+      ocean. The lizard is positioned in the center of the scene, with the ocean waves
+      visible in the background. The rock is located close to the water, providing a picturesque
+      setting for the lizard''s resting spot.
+
+    target_codes:
+    - 1_frog
+    - 2_dragon
+    - 3_lego_bricks
+    - 4_crochet_lizard
+
+-
+    init_img:  dataset/jump_yay.png
+
+    source_prompt: A man wearing a white shirt and black shorts, jumping
+        in the air with his left arm raised. He appears to be enjoying the moment and is smiling.
+        The background consists of a cloudy sky, which adds to the overall atmosphere of
+        the scene.
+
+    target_prompts:
+    - A shiny silver humanoid robot jumping
+        in the air with its left arm raised. It appears to be enjoying the moment and is smiling.
+        The background consists of a cloudy sky, which adds to the overall atmosphere of
+        the scene.
+    - A man in anime style wearing a white shirt and black shorts, jumping
+        in the air with his left arm raised. He appears to be enjoying the moment and is smiling.
+        The background consists of a cloudy sky, which adds to the overall atmosphere of
+        the scene.
+
+    target_codes:
+    - 1_robot
+    - 2_anime_style
+
+-
+    init_img:  dataset/kid_running.png
+
+    source_prompt: A young boy running through a grassy field. He appears to be enjoying his time
+        outdoors. The field is surrounded by trees, providing a natural and serene environment.
+
+    target_prompts:
+    - A shiny silver robot running through a grassy field. It appears to be enjoying its time outdoors.
+      The field is surrounded by trees, providing a natural and serene environment.
+    - A young boy in realistic disney style running through a grassy field. He appears to be enjoying his time
+        outdoors. The field is surrounded by trees, providing a natural and serene environment.
+
+    target_codes:
+    - 1_robot
+    - 2_disney_style
+
+-
+    init_img:  dataset/meditation1.png
+
+    source_prompt: A man sitting on the ground and appears to be in a relaxed
+      position, meditating.
+
+    target_prompts:
+    - A golden sculpture of buddha sitting on the ground and appears to be in a relaxed
+      position, meditating.
+
+    target_codes:
+    - 1_golden_buddha_statue
+
+
+-
+    init_img:  dataset/meditation2.png
+
+    source_prompt: A man sitting on a wooden floor in a meditative position, with his eyes closed.
+
+    target_prompts:
+    - A man in anime style sitting on a wooden floor in a meditative position, with his eyes closed
+
+    target_codes:
+    - 1_anime
+
+-
+    init_img: dataset/mountain_black.png
+
+    source_prompt: A large, green, hill in the middle of a vast, black, and barren landscape.
+
+    target_prompts:
+    - A large egyptian pyramid in the middle of a vast, black, and barren landscape.
+    - A large mesoamerican pyramid in the middle of a vast, black, and barren landscape.
+    - A large, elegant wedding cake with multiple tiers, beautifully decorated with roses and intricate ornaments in the middle of a vast, black, and barren landscape.
+    - A large volcano, during a violent eruption with a lot of black smoke and lava, in the middle of a vast, black, and barren landscape.
+
+    target_codes:
+    - 1_egyptian_pyramid
+    - 2_mesoamerican_pyramid
+    - 3_wedding_cake
+    - 4_volcano
+
+-
+    init_img: dataset/penguins.png
+
+    source_prompt: Two penguins standing in a lake.
+      They are positioned close to each other, with one penguin on the
+      left side and the other on the right side of the picture.
+
+    target_prompts:
+    - Two origami penguins standing in a lake.
+      They are positioned close to each other, with one origami penguin on the
+      left side and the other on the right side of the picture.
+    - Two penguins made out of lego bricks standing in a lake.
+      They are positioned close to each other, with one penguin on the
+      left side and the other on the right side of the picture.
+
+    target_codes:
+    - 1_origami
+    - 2_lego_bricks
+
+-
+    init_img: dataset/puppies.png
+
+    source_prompt: Two adorable golden retriever puppies sitting in
+      a grassy field. They are positioned close to each other, with one dog on the left
+      and the other on the right. Both dogs have their mouths open, possibly panting.
+
+    target_prompts:
+    - Two adorable husky puppies sitting in
+      a grassy field. They are positioned close to each other, with one dog on the left
+      and the other on the right. Both dogs have their mouths open, possibly panting or
+      enjoying the outdoor environment.
+    - Two adorable bear cubs sitting in
+      a grassy field. They are positioned close to each other, with one bear cub on the left
+      and the other on the right. Both cubs have their mouths open, possibly panting or
+      enjoying the outdoor environment.
+    - Two adorable golden retriever puppies made out of lego bricks sitting in
+      a grassy field. They are positioned close to each other, with one dog on the left
+      and the other on the right. Both dogs have their mouths open, possibly panting or
+      enjoying the outdoor environment.
+    - Two adorable wolf cubs sitting in
+      a grassy field. They are positioned close to each other, with one wolf cub on the left
+      and the other on the right. Both cubs have their mouths open, possibly panting or
+      enjoying the outdoor environment.
+    - Two adorable crochet golden retriever puppies sitting in
+      a grassy field. They are positioned close to each other, with one dog on the left
+      and the other on the right. Both dogs have their mouths open, possibly panting or
+      enjoying the outdoor environment.
+
+    target_codes:
+    - 1_husky_puppies
+    - 2_bear_cubs
+    - 3_lego_bricks
+    - 4_wolf_cubs
+    - 5_crochet
+
+-
+    init_img:  dataset/rabbit.png
+
+    source_prompt: A small brown and white rabbit sitting in a grassy
+        field. The rabbit is surrounded by a variety of white flowers.
+
+    target_prompts:
+    - A small puppy sitting in a grassy field. The puppy is surrounded by a variety of white flowers.
+    - A small kitten sitting in a grassy field. The kitten is surrounded by a variety of white flowers.
+    - A small brown and white rabbit in pixar style sitting in a grassy field. The rabbit is surrounded by a variety of white flowers.
+    - A small brown and white rabbit in studio ghibli style sitting in a grassy field. The rabbit is surrounded by a variety of white flowers.
+    - A small brown and white rabbit made out of lego bricks sitting in a grassy field. The rabbit is surrounded by a variety of white flowers.
+
+    target_codes:
+    - 1_puppy
+    - 2_kitten
+    - 3_pixar_style
+    - 4_studio_ghibli_style
+    - 5_lego_bricks
+
+-
+    init_img:  dataset/rocks.png
+
+    source_prompt: A stack of gray rocks, laying on top of each other on a brown and gray beach.
+        The rocks are arranged in a pyramid shape, creating an impressive
+        and natural display. The brown and gray beach setting provides a serene and picturesque backdrop
+        for this unique rock formation.
+
+    target_prompts:
+    - A stack of colorful macarons, laying on top of each other on a brown and gray beach.
+      The colorful macarons are arranged in a pyramid shape, creating an impressive
+      display. The brown and gray beach setting provides a serene and picturesque backdrop
+      for this unique colorful macarons formation on a brown and gray beach.
+    - A bonsai tree on a brown and gray beach. The brown and gray beach setting provides a serene and picturesque backdrop
+      for this bonsai tree.
+    - A stack of colorful wooden blocks, laying on top of each other on a brown and gray beach.
+      The colorful wooden blocks are arranged in a pyramid shape, creating an impressive
+      and natural display. The brown and gray beach setting provides a serene and picturesque backdrop
+      for this unique colorful wooden blocks formation.
+
+    target_codes:
+    - 1_macarons
+    - 2_bonsai_tree
+    - 3_colorful_wooden_blocks
+
+-
+    init_img:  dataset/tiger.png
+
+    source_prompt: A large tiger standing in a swamp.
+      The tiger is positioned towards the left side of the scene, with
+      its legs submerged in the water. The water is covered with green algae.
+
+    target_prompts:
+    - A large lion standing in a swamp.
+      The lion is positioned towards the left side of the scene, with
+      its legs submerged in the water. The water is covered with green algae.
+    - A large crochet tiger standing in a swamp.
+      The crochet tiger is positioned towards the left side of the scene, with
+      its legs submerged in the water. The water is covered with green algae.
+    - A large wolf standing in a swamp.
+      The wolf is positioned towards the left side of the scene, with
+      its legs submerged in the water. The water is covered with green algae.
+
+    target_codes:
+    - 1_lion
+    - 2_crochet_tiger
+    - 3_wolf

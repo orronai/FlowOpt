@@ -1,0 +1,10 @@
+torch
+torchvision
+diffusers
+transformers
+accelerate
+sentencepiece
+protobuf
+matplotlib
+lpips
+piq
