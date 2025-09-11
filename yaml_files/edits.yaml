@@ -115,6 +115,53 @@
     - 1_wooden_sculpture
 
 -
+    init_img:  new_data/cow_grass2.png
+
+    source_prompt: A large brown and white cow standing in a grassy
+        field. The cow is positioned towards the center of the scene.
+        The field is lush and green, providing a perfect environment
+        for the cow to graze.
+
+    target_prompts:
+    - A large cow in studio ghibli style standing in a grassy
+        field. The studio ghibli style cow is positioned towards the center of the scene.
+        The field is lush and green, providing a perfect environment
+        for the cow to graze.
+    - A large cow made out of lego bricks standing in a grassy
+        field. The lego brick cow is positioned towards the center of the scene.
+        The field is lush and green, providing a perfect environment
+        for the cow to graze.
+    - A large cow made out of crochet standing in a grassy
+        field. The crochet cow is positioned towards the center of the scene.
+        The field is lush and green, providing a perfect environment
+        for the cow to graze.
+    - A large cow made out of wooden blocks standing in a grassy  
+        field. The wooden block cow is positioned towards the center of the scene.
+        The field is lush and green, providing a perfect environment
+        for the cow to graze.
+    - A large cow made out of origami folded paper art standing in a grassy  
+        field. The origami folded paper art cow is positioned towards the center of the scene.
+        The field is lush and green, providing a perfect environment
+        for the cow to graze.
+    - A large cow made out of colorful toy bricks standing in a grassy  
+        field. The colorful toy brick cow is positioned towards the center of the scene.
+        The field is lush and green, providing a perfect environment
+        for the cow to graze.
+    - A large cow made out of flowers standing in a grassy  
+        field. The flower cow is positioned towards the center of the scene.
+        The field is lush and green, providing a perfect environment
+        for the cow to graze.
+
+    target_codes:
+    - 1_studio_ghibli_style
+    - 2_lego_bricks
+    - 3_crochet
+    - 4_wooden_blocks
+    - 5_origami_folded_paper_art
+    - 6_colorful_toy_bricks
+    - 7_flowers
+
+-
     init_img:  dataset/dog.png
 
     source_prompt: A small black and brown dog sitting on a lush green field.
