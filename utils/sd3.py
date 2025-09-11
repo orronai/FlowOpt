@@ -189,7 +189,8 @@ def sd3_inversion(
 
     return (
         mse_array, lpips_array, ssim_array,
-        enc_dec_img_ssim, enc_dec_img_lpips, enc_dec_img_mse, enc_dec_img_psnr,
+        enc_dec_img_ssim, enc_dec_img_lpips,
+        enc_dec_img_mse, enc_dec_img_psnr,
     )
 
 @torch.no_grad()
