@@ -3,7 +3,7 @@
   dataset_yaml: yaml_files/edits.yaml
   model_type: "SD3"
   T_steps: 10
-  n_max: 0
+  n_max: 10
   max_iterations: 30
   eta: 0.01
   src_guidance_scale: 1.0

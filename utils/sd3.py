@@ -31,13 +31,13 @@ def calc_v_sd3(
 
 @torch.no_grad()
 def uniinv(
-    pipe, timesteps, n_max, x0_src, src_prompt_embeds_all,
+    pipe, timesteps, n_start, x0_src, src_prompt_embeds_all,
     src_pooled_prompt_embeds_all, src_guidance_scale,
 ):
     x_t = x0_src.clone()
     timesteps_inv = torch.cat([torch.tensor([0.0], device=pipe.device), timesteps.flip(dims=(0,))], dim=0)
-    if n_max > 0:
-        zipped_timesteps_inv = zip(timesteps_inv[:-n_max - 1], timesteps_inv[1:-n_max])
+    if n_start > 0:
+        zipped_timesteps_inv = zip(timesteps_inv[:-n_start - 1], timesteps_inv[1:-n_start])
     else:
         zipped_timesteps_inv = zip(timesteps_inv[:-1], timesteps_inv[1:])
     next_v = None
@@ -72,7 +72,7 @@ def uniinv(
 
 @torch.no_grad()
 def initialization(
-    pipe, scheduler, T_steps, n_max, x0_src,
+    pipe, scheduler, T_steps, n_start, x0_src,
     src_prompt, negative_prompt, src_guidance_scale,
 ):
     pipe._guidance_scale = src_guidance_scale
@@ -96,7 +96,7 @@ def initialization(
     pipe._num_timesteps = len(timesteps)
 
     x_t = uniinv(
-        pipe, timesteps, n_max, x0_src, src_prompt_embeds_all,
+        pipe, timesteps, n_start, x0_src, src_prompt_embeds_all,
         src_pooled_prompt_embeds_all, src_guidance_scale,
     )
 
@@ -106,14 +106,14 @@ def initialization(
 
 @torch.no_grad()
 def sd3_denoise(
-    pipe, timesteps, n_max, x_t, prompt_embeds_all,
+    pipe, timesteps, n_start, x_t, prompt_embeds_all,
     pooled_prompt_embeds_all, guidance_scale,
 ):
     f_xt = x_t.clone()
-    for i, t in enumerate(timesteps[n_max:]):
+    for i, t in enumerate(timesteps[n_start:]):
         t_i = t / 1000
-        if i + 1 < len(timesteps[n_max:]): 
-            t_im1 = (timesteps[n_max + i + 1]) / 1000
+        if i + 1 < len(timesteps[n_start:]):
+            t_im1 = (timesteps[n_start + i + 1]) / 1000
         else:
             t_im1 = torch.zeros_like(t_i).to(t_i.device)
         dt = t_im1 - t_i
@@ -134,10 +134,11 @@ def sd3_inversion(
     pipe, scheduler, T_steps, n_max, x0_src, src_prompt, negative_prompt, src_guidance_scale,
     flowopt_iterations, eta, x_0, lpips_loss_fn, exp_name, src_prompt_txt,
 ):
+    n_start = T_steps - n_max
     (
         x_t, x0_src, timesteps, src_prompt_embeds_all, src_pooled_prompt_embeds_all,
     ) = initialization(
-        pipe, scheduler, T_steps, n_max, x0_src, src_prompt, negative_prompt, src_guidance_scale,
+        pipe, scheduler, T_steps, n_start, x0_src, src_prompt, negative_prompt, src_guidance_scale,
     )
 
     mse_array = np.zeros(flowopt_iterations + 1)
@@ -147,7 +148,7 @@ def sd3_inversion(
     j_star = x0_src.clone().to(torch.float32)
     for flowopt_iter in range(flowopt_iterations + 1):
         f_xt = sd3_denoise(
-            pipe, timesteps, n_max, x_t, src_prompt_embeds_all,
+            pipe, timesteps, n_start, x_t, src_prompt_embeds_all,
             src_pooled_prompt_embeds_all, src_guidance_scale,
         )
 
@@ -197,8 +198,9 @@ def sd3_editing(
     src_guidance_scale, tar_guidance_scale, flowopt_iterations, eta,
     exp_name, src_prompt_txt, tar_prompt_txt,
 ):
+    n_start = T_steps - n_max
     x_t, x0_src, timesteps, _, _, = initialization(
-        pipe, scheduler, T_steps, n_max, x0_src, src_prompt, negative_prompt,src_guidance_scale,
+        pipe, scheduler, T_steps, n_start, x0_src, src_prompt, negative_prompt, src_guidance_scale,
     )
 
     pipe._guidance_scale = tar_guidance_scale
@@ -222,7 +224,7 @@ def sd3_editing(
     j_star = x0_src.clone().to(torch.float32)
     for flowopt_iter in range(flowopt_iterations + 1):
         f_xt = sd3_denoise(
-            pipe, timesteps, n_max, x_t, tar_prompt_embeds_all,
+            pipe, timesteps, n_start, x_t, tar_prompt_embeds_all,
             tar_pooled_prompt_embeds_all, tar_guidance_scale,
         )
 

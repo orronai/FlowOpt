@@ -98,11 +98,11 @@ def prep_input(pipe, scheduler, T_steps, x0_src, src_prompt, src_guidance_scale)
 
 @torch.no_grad()
 def uniinv(
-    pipe, scheduler, timesteps, n_max, x0_src, src_prompt_embeds,
+    pipe, scheduler, timesteps, n_start, x0_src, src_prompt_embeds,
     src_pooled_prompt_embeds, src_guidance, src_text_ids, latent_src_image_ids,
 ):
     x_t = x0_src.clone()
-    timesteps_inv = timesteps.flip(dims=(0,))[:-n_max] if n_max > 0 else timesteps.flip(dims=(0,))
+    timesteps_inv = timesteps.flip(dims=(0,))[:-n_start] if n_start > 0 else timesteps.flip(dims=(0,))
     next_v = None
     for _i, t in enumerate(timesteps_inv):
         scheduler._init_step_index(t)
@@ -135,7 +135,7 @@ def uniinv(
 
 @torch.no_grad()
 def initialization(
-    pipe, scheduler, T_steps, n_max, x0_src, src_prompt, src_guidance_scale,
+    pipe, scheduler, T_steps, n_start, x0_src, src_prompt, src_guidance_scale,
 ):
     (
         x0_src, latent_src_image_ids, timesteps, orig_height, orig_width,
@@ -150,7 +150,7 @@ def initialization(
         src_guidance = None
 
     x_t = uniinv(
-        pipe, scheduler, timesteps, n_max, x0_src,
+        pipe, scheduler, timesteps, n_start, x0_src,
         src_prompt_embeds, src_pooled_prompt_embeds, src_guidance,
         src_text_ids, latent_src_image_ids,
     )
@@ -162,11 +162,11 @@ def initialization(
 
 @torch.no_grad()
 def flux_denoise(
-    pipe, scheduler, timesteps, n_max, x_t, prompt_embeds, pooled_prompt_embeds,
+    pipe, scheduler, timesteps, n_start, x_t, prompt_embeds, pooled_prompt_embeds,
     guidance, text_ids, latent_image_ids,
 ):
     f_xt = x_t.clone()
-    for _i, t in enumerate(timesteps[n_max:]):
+    for _i, t in enumerate(timesteps[n_start:]):
         scheduler._init_step_index(t)
         t_i = scheduler.sigmas[scheduler.step_index]
         t_im1 = scheduler.sigmas[scheduler.step_index + 1]
@@ -188,11 +188,12 @@ def flux_inversion(
     pipe, scheduler, T_steps, n_max, x0_src, src_prompt, src_guidance_scale,
     flowopt_iterations, eta, x_0, lpips_loss_fn, exp_name, src_prompt_txt,
 ):
+    n_start = T_steps - n_max
     (
         x_t, x0_src, timesteps, latent_src_image_ids, orig_height, orig_width,
         src_prompt_embeds, src_pooled_prompt_embeds, src_text_ids, src_guidance,
     ) = initialization(
-        pipe, scheduler, T_steps, n_max, x0_src, src_prompt, src_guidance_scale
+        pipe, scheduler, T_steps, n_start, x0_src, src_prompt, src_guidance_scale
     )
 
     mse_array = np.zeros(flowopt_iterations + 1)
@@ -202,7 +203,7 @@ def flux_inversion(
     j_star = x0_src.clone().to(torch.float32)
     for flowopt_iter in range(flowopt_iterations + 1):
         f_xt = flux_denoise(
-            pipe, scheduler, timesteps, n_max, x_t,
+            pipe, scheduler, timesteps, n_start, x_t,
             src_prompt_embeds, src_pooled_prompt_embeds, src_guidance,
             src_text_ids, latent_src_image_ids,
         )
@@ -246,7 +247,8 @@ def flux_inversion(
 
     return (
         mse_array, lpips_array, ssim_array,
-        enc_dec_img_ssim, enc_dec_img_lpips, enc_dec_img_mse, enc_dec_img_psnr,
+        enc_dec_img_ssim, enc_dec_img_lpips,
+        enc_dec_img_mse, enc_dec_img_psnr,
     )
 
 @torch.no_grad()
@@ -255,11 +257,12 @@ def flux_editing(
     src_guidance_scale, tar_guidance_scale, flowopt_iterations, eta,
     exp_name, src_prompt_txt, tar_prompt_txt,
 ):
+    n_start = T_steps - n_max
     (
         x_t, x0_src, timesteps, latent_src_image_ids, orig_height, orig_width,
         _, _, _, _,
     ) = initialization(
-        pipe, scheduler, T_steps, n_max, x0_src, src_prompt, src_guidance_scale
+        pipe, scheduler, T_steps, n_start, x0_src, src_prompt, src_guidance_scale
     )
 
     pipe._guidance_scale = tar_guidance_scale
@@ -283,7 +286,7 @@ def flux_editing(
     j_star = x0_src.clone().to(torch.float32)
     for flowopt_iter in range(flowopt_iterations + 1):
         f_xt = flux_denoise(
-            pipe, scheduler, timesteps, n_max, x_t,
+            pipe, scheduler, timesteps, n_start, x_t,
             tar_prompt_embeds, pooled_tar_prompt_embeds, tar_guidance,
             tar_text_ids, latent_src_image_ids,
         )

@@ -3,7 +3,7 @@
   dataset_yaml: yaml_files/edits.yaml
   model_type: "FLUX"
   T_steps: 15
-  n_max: 2
+  n_max: 13
   max_iterations: 8
   eta: 0.0025
   src_guidance_scale: 1.0
