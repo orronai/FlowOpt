@@ -1,16 +1,34 @@
+import os
+from typing import Iterator, List, Optional, Tuple
+
 import numpy as np
+import piq
 import torch
 import torchvision
-import os
-import piq
-
+from diffusers import FlowMatchEulerDiscreteScheduler, StableDiffusion3Pipeline
 from diffusers.pipelines.stable_diffusion.pipeline_stable_diffusion import retrieve_timesteps
+from lpips import LPIPS
+from PIL import Image
 
 @torch.no_grad()
 def calc_v_sd3(
-    pipe, latent_model_input, prompt_embeds,
-    pooled_prompt_embeds, guidance_scale, t,
-):
+    pipe: StableDiffusion3Pipeline, latent_model_input: torch.Tensor,
+    prompt_embeds: torch.Tensor, pooled_prompt_embeds: torch.Tensor,
+    guidance_scale: float, t: torch.Tensor,
+) -> torch.Tensor:
+    """
+    Calculate the velocity (v) for Stable Diffusion 3.
+
+    Args:
+        pipe (StableDiffusion3Pipeline): The Stable Diffusion 3 pipeline.
+        latent_model_input (torch.Tensor): The input latent tensor.
+        prompt_embeds (torch.Tensor): The text embeddings for the prompt.
+        pooled_prompt_embeds (torch.Tensor): The pooled text embeddings for the prompt.
+        guidance_scale (float): The guidance scale for classifier-free guidance.
+        t (torch.Tensor): The current timestep.
+    Returns:
+        torch.Tensor: The predicted noise (velocity).
+    """
     timestep = t.expand(latent_model_input.shape[0])
 
     noise_pred = pipe.transformer(
@@ -29,11 +47,27 @@ def calc_v_sd3(
 
     return noise_pred
 
+# https://github.com/DSL-Lab/UniEdit-Flow
 @torch.no_grad()
 def uniinv(
-    pipe, timesteps, n_start, x0_src, src_prompt_embeds_all,
-    src_pooled_prompt_embeds_all, src_guidance_scale,
-):
+    pipe: StableDiffusion3Pipeline, timesteps: torch.Tensor, n_start: int,
+    x0_src: torch.Tensor, src_prompt_embeds_all: torch.Tensor,
+    src_pooled_prompt_embeds_all: torch.Tensor, src_guidance_scale: float,
+) -> torch.Tensor:
+    """
+    Perform the UniInv inversion process for Stable Diffusion 3.
+
+    Args:
+        pipe (StableDiffusion3Pipeline): The Stable Diffusion 3 pipeline.
+        timesteps (torch.Tensor): The timesteps for the diffusion process.
+        n_start (int): The number of initial timesteps to skip.
+        x0_src (torch.Tensor): The source latent tensor.
+        src_prompt_embeds_all (torch.Tensor): The text embeddings for the source prompt.
+        src_pooled_prompt_embeds_all (torch.Tensor): The pooled text embeddings for the source prompt.
+        src_guidance_scale (float): The guidance scale for classifier-free guidance.
+    Returns:
+        torch.Tensor: The inverted latent tensor.
+    """
     x_t = x0_src.clone()
     timesteps_inv = torch.cat([torch.tensor([0.0], device=pipe.device), timesteps.flip(dims=(0,))], dim=0)
     if n_start > 0:
@@ -72,9 +106,30 @@ def uniinv(
 
 @torch.no_grad()
 def initialization(
-    pipe, scheduler, T_steps, n_start, x0_src,
-    src_prompt, negative_prompt, src_guidance_scale,
-):
+    pipe: StableDiffusion3Pipeline, scheduler: FlowMatchEulerDiscreteScheduler,
+    T_steps: int, n_start: int, x0_src: torch.Tensor,
+    src_prompt: str, negative_prompt: str, src_guidance_scale: float,
+) -> Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+    """
+    Initialize the inversion process by preparing the latent tensor and prompt embeddings, and performing UniInv.
+
+    Args:
+        pipe (StableDiffusion3Pipeline): The Stable Diffusion 3 pipeline.
+        scheduler (FlowMatchEulerDiscreteScheduler): The scheduler for the diffusion process.
+        T_steps (int): The total number of timesteps for the diffusion process.
+        n_start (int): The number of initial timesteps to skip.
+        x0_src (torch.Tensor): The source latent tensor.
+        src_prompt (str): The source text prompt.
+        negative_prompt (str): The negative text prompt for classifier-free guidance.
+        src_guidance_scale (float): The guidance scale for classifier-free guidance.
+    Returns:
+        Tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor]:
+            - The inverted latent tensor.
+            - The original source latent tensor.
+            - The timesteps for the diffusion process.
+            - The text embeddings for the source prompt.
+            - The pooled text embeddings for the source prompt.
+    """
     pipe._guidance_scale = src_guidance_scale
     (
         src_prompt_embeds,
@@ -106,9 +161,24 @@ def initialization(
 
 @torch.no_grad()
 def sd3_denoise(
-    pipe, timesteps, n_start, x_t, prompt_embeds_all,
-    pooled_prompt_embeds_all, guidance_scale,
-):
+    pipe: StableDiffusion3Pipeline, timesteps: torch.Tensor, n_start: int,
+    x_t: torch.Tensor, prompt_embeds_all: torch.Tensor,
+    pooled_prompt_embeds_all: torch.Tensor, guidance_scale: float,
+) -> torch.Tensor:
+    """
+    Perform the denoising process for Stable Diffusion 3.
+
+    Args:
+        pipe (StableDiffusion3Pipeline): The Stable Diffusion 3 pipeline.
+        timesteps (torch.Tensor): The timesteps for the diffusion process.
+        n_start (int): The number of initial timesteps to skip.
+        x_t (torch.Tensor): The latent tensor at the starting timestep.
+        prompt_embeds_all (torch.Tensor): The text embeddings for the prompt.
+        pooled_prompt_embeds_all (torch.Tensor): The pooled text embeddings for the prompt.
+        guidance_scale (float): The guidance scale for classifier-free guidance.
+    Returns:
+        torch.Tensor: The denoised latent tensor.
+    """
     f_xt = x_t.clone()
     for i, t in enumerate(timesteps[n_start:]):
         t_i = t / 1000
@@ -131,9 +201,40 @@ def sd3_denoise(
 
 @torch.no_grad()
 def sd3_inversion(
-    pipe, scheduler, T_steps, n_max, x0_src, src_prompt, negative_prompt, src_guidance_scale,
-    flowopt_iterations, eta, x_0, lpips_loss_fn, exp_name, src_prompt_txt,
-):
+    pipe: StableDiffusion3Pipeline, scheduler: FlowMatchEulerDiscreteScheduler,
+    T_steps: int, n_max: int, x0_src: torch.Tensor, src_prompt: str,
+    negative_prompt: str, src_guidance_scale: float, flowopt_iterations: int,
+    eta: float, x_0: torch.Tensor, lpips_loss_fn: LPIPS, exp_name: str,
+    src_prompt_txt: str,
+) -> Tuple[np.ndarray, np.ndarray, np.ndarray, float, float, float, float]:
+    """
+    Perform the inversion process for Stable Diffusion 3 using FlowOpt.
+
+    Args:
+        pipe (StableDiffusion3Pipeline): The Stable Diffusion 3 pipeline.
+        scheduler (FlowMatchEulerDiscreteScheduler): The scheduler for the diffusion process.
+        T_steps (int): The total number of timesteps for the diffusion process.
+        n_max (int): The maximum number of timesteps to consider.
+        x0_src (torch.Tensor): The source latent tensor.
+        src_prompt (str): The source text prompt.
+        negative_prompt (str): The negative text prompt for classifier-free guidance.
+        src_guidance_scale (float): The guidance scale for classifier-free guidance.
+        flowopt_iterations (int): The number of FlowOpt iterations to perform.
+        eta (float): The step size for the FlowOpt update.
+        x_0 (torch.Tensor): The original source image tensor.
+        lpips_loss_fn (LPIPS): The LPIPS loss function for perceptual similarity.
+        exp_name (str): The name of the experiment for saving results.
+        src_prompt_txt (str): A text identifier for the source prompt for saving results.
+    Returns:
+        Tuple[np.ndarray, np.ndarray, np.ndarray, float, float, float, float]:
+            - The MSE array over FlowOpt iterations.
+            - The LPIPS array over FlowOpt iterations.
+            - The SSIM array over FlowOpt iterations.
+            - The SSIM of the encoded-decoded image.
+            - The LPIPS of the encoded-decoded image.
+            - The MSE of the encoded-decoded image.
+            - The PSNR of the encoded-decoded image.
+    """
     n_start = T_steps - n_max
     (
         x_t, x0_src, timesteps, src_prompt_embeds_all, src_pooled_prompt_embeds_all,
@@ -145,12 +246,12 @@ def sd3_inversion(
     lpips_array = np.zeros(flowopt_iterations + 1)
     ssim_array = np.zeros(flowopt_iterations + 1)
 
-    j_star = x0_src.clone().to(torch.float32)
+    j_star = x0_src.clone().to(torch.float32)  # y
     for flowopt_iter in range(flowopt_iterations + 1):
         f_xt = sd3_denoise(
             pipe, timesteps, n_start, x_t, src_prompt_embeds_all,
             src_pooled_prompt_embeds_all, src_guidance_scale,
-        )
+        )  # Eq. (3)
 
         f_xt_denorm = (f_xt / pipe.vae.config.scaling_factor) + pipe.vae.config.shift_factor
         with torch.autocast("cuda"), torch.inference_mode():
@@ -159,7 +260,7 @@ def sd3_inversion(
 
         if flowopt_iter < flowopt_iterations:
             x_t = x_t.to(torch.float32)
-            x_t = x_t - eta * (f_xt - j_star)
+            x_t = x_t - eta * (f_xt - j_star)  # Eq. (6) with c = c_src
             x_t = x_t.to(x0_src.dtype)
 
         if flowopt_iter == flowopt_iterations:
@@ -179,7 +280,8 @@ def sd3_inversion(
             torchvision.utils.save_image(
                 f_xt_image,
                 os.path.join(
-                    flowopt_save_dir, f"output_flowopt_iterations={flowopt_iter}_T_steps={T_steps}_n_max={n_max}_cfg={src_guidance_scale}.png",
+                    flowopt_save_dir,
+                    f"output_flowopt_iterations={flowopt_iter}_T_steps={T_steps}_n_max={n_max}_cfg={src_guidance_scale}.png",
                 ),
             )
 
@@ -195,13 +297,40 @@ def sd3_inversion(
 
 @torch.no_grad()
 def sd3_editing(
-    pipe, scheduler, T_steps, n_max, x0_src, src_prompt, tar_prompt, negative_prompt,
-    src_guidance_scale, tar_guidance_scale, flowopt_iterations, eta,
-    exp_name, src_prompt_txt, tar_prompt_txt,
-):
+    pipe: StableDiffusion3Pipeline, scheduler: FlowMatchEulerDiscreteScheduler,
+    T_steps: int, n_max: int, x0_src: torch.Tensor, src_prompt: str,
+    tar_prompt: str, negative_prompt: str, src_guidance_scale: float,
+    tar_guidance_scale: float, flowopt_iterations: int, eta: float,
+    exp_name: str, src_prompt_txt: str, tar_prompt_txt: str,
+    gradio_app: bool = False,
+) -> Optional[Iterator[List[Tuple[Image.Image, str]]]]:
+    """
+    Perform the editing process for Stable Diffusion 3 using FlowOpt.
+
+    Args:
+        pipe (StableDiffusion3Pipeline): The Stable Diffusion 3 pipeline.
+        scheduler (FlowMatchEulerDiscreteScheduler): The scheduler for the diffusion process.
+        T_steps (int): The total number of timesteps for the diffusion process.
+        n_max (int): The maximum number of timesteps to consider.
+        x0_src (torch.Tensor): The source latent tensor.
+        src_prompt (str): The source text prompt.
+        tar_prompt (str): The target text prompt for editing.
+        negative_prompt (str): The negative text prompt for classifier-free guidance.
+        src_guidance_scale (float): The guidance scale for the source prompt.
+        tar_guidance_scale (float): The guidance scale for the target prompt.
+        flowopt_iterations (int): The number of FlowOpt iterations to perform.
+        eta (float): The step size for the FlowOpt update.
+        exp_name (str): The name of the experiment for saving results.
+        src_prompt_txt (str): A text identifier for the source prompt for saving results.
+        tar_prompt_txt (str): A text identifier for the target prompt for saving results.
+        gradio_app (bool): Whether to yield intermediate results for a gradio app.
+    Yields:
+        Optional[Iterator[List[Tuple[Image.Image, str]]]]: A list of tuples containing the generated images and their corresponding iteration labels for gradio app.
+    """
     n_start = T_steps - n_max
     x_t, x0_src, timesteps, _, _, = initialization(
-        pipe, scheduler, T_steps, n_start, x0_src, src_prompt, negative_prompt, src_guidance_scale,
+        pipe, scheduler, T_steps, n_start, x0_src, src_prompt,
+        negative_prompt, src_guidance_scale,
     )
 
     pipe._guidance_scale = tar_guidance_scale
@@ -222,35 +351,43 @@ def sd3_editing(
     tar_prompt_embeds_all = torch.cat([tar_negative_prompt_embeds, tar_prompt_embeds], dim=0) if pipe.do_classifier_free_guidance else tar_prompt_embeds
     tar_pooled_prompt_embeds_all = torch.cat([tar_negative_pooled_prompt_embeds, tar_pooled_prompt_embeds], dim=0) if pipe.do_classifier_free_guidance else tar_pooled_prompt_embeds
 
-    j_star = x0_src.clone().to(torch.float32)
+    if gradio_app:
+        history = []
+    j_star = x0_src.clone().to(torch.float32)  # y
     for flowopt_iter in range(flowopt_iterations + 1):
         f_xt = sd3_denoise(
             pipe, timesteps, n_start, x_t, tar_prompt_embeds_all,
             tar_pooled_prompt_embeds_all, tar_guidance_scale,
-        )
+        )  # Eq. (3)
 
         if flowopt_iter < flowopt_iterations:
             x_t = x_t.to(torch.float32)
-            x_t = x_t - eta * (f_xt - j_star)
+            x_t = x_t - eta * (f_xt - j_star)  # Eq. (6) with c = c_tar
             x_t = x_t.to(x0_src.dtype)
 
         x0_flowopt = f_xt.clone()
         x0_flowopt_denorm = (x0_flowopt / pipe.vae.config.scaling_factor) + pipe.vae.config.shift_factor
         with torch.autocast("cuda"), torch.inference_mode():
             x0_flowopt_image = pipe.vae.decode(x0_flowopt_denorm, return_dict=False)[0].clamp(-1, 1)
-        x0_flowopt_image = pipe.image_processor.postprocess(x0_flowopt_image, output_type="pt")
+        if gradio_app:
+            x0_flowopt_image_pil = pipe.image_processor.postprocess(x0_flowopt_image)[0]
+            history.append((x0_flowopt_image_pil, f"Iteration {flowopt_iter}"))
+            yield history
+        else:
+            x0_flowopt_image = pipe.image_processor.postprocess(x0_flowopt_image, output_type="pt")
 
-        flowopt_save_dir = os.path.join("saved_info", f"{exp_name}", "SD3", f"eta={eta}", f"src_{src_prompt_txt}", f"tar_{tar_prompt_txt}")
-        os.makedirs(flowopt_save_dir, exist_ok=True)
+            flowopt_save_dir = os.path.join("saved_info", f"{exp_name}", "SD3", f"eta={eta}", f"src_{src_prompt_txt}", f"tar_{tar_prompt_txt}")
+            os.makedirs(flowopt_save_dir, exist_ok=True)
 
-        torchvision.utils.save_image(
-            x0_flowopt_image,
-            os.path.join(
-                flowopt_save_dir, f"output_flowopt_iterations={flowopt_iter}_T_steps={T_steps}_n_max={n_max}_cfg={tar_guidance_scale}.png",
-            ),
-        )
+            torchvision.utils.save_image(
+                x0_flowopt_image,
+                os.path.join(
+                    flowopt_save_dir,
+                    f"output_flowopt_iterations={flowopt_iter}_T_steps={T_steps}_n_max={n_max}_cfg={tar_guidance_scale}.png",
+                ),
+            )
 
-        if flowopt_iter == flowopt_iterations:
-            with open(f"{flowopt_save_dir}/prompts.txt", "w") as f:
-                f.write(f"Source prompt: {src_prompt}\n")
-                f.write(f"Target prompt: {tar_prompt}\n")
+            if flowopt_iter == flowopt_iterations:
+                with open(f"{flowopt_save_dir}/prompts.txt", "w") as f:
+                    f.write(f"Source prompt: {src_prompt}\n")
+                    f.write(f"Target prompt: {tar_prompt}\n")

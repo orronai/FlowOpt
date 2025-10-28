@@ -1,110 +1,40 @@
 import argparse
 import os
 import random
-import yaml
 
-import matplotlib.pyplot as plt
 import numpy as np
 import torch
-from tqdm import tqdm
-from PIL import Image
-
+import yaml
 from diffusers import FluxPipeline, StableDiffusion3Pipeline
 from lpips import LPIPS
+from PIL import Image
+from tqdm import tqdm
 
-from utils.flux import flux_inversion, flux_editing
-from utils.sd3 import sd3_inversion, sd3_editing
+from utils.flux import flux_editing, flux_inversion
+from utils.inversion_utils import save_inversion_stats
+from utils.sd3 import sd3_editing, sd3_inversion
 
 
 def seed_everything(seed: int) -> None:
+    """
+    Set the random seed for reproducibility.
+
+    Args:
+        seed (int): The seed value to set.
+    """
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
-def plot_graph(y_values, x_label, y_label, save_path, h_line=None):
-    plt.rcParams.update({
-        "text.usetex": True,
-        "font.family": "cmu-serif",
-        "mathtext.fontset": "cm",
-        "font.size": 14,
-        "text.latex.preamble": r"\usepackage{amsmath}"
-    })
-    plt.style.use('tableau-colorblind10')
-
-    plt.figure(figsize=(10, 5))
-    plt.plot(y_values, label='FlowOpt', linewidth=2.5)
-    if h_line is not None:
-        plt.axhline(
-            y=h_line, color='r', linestyle='--', linewidth=2.5,
-            label='$\\mathcal{D}(\\mathcal{E}(\\boldsymbol{x}))$',
-        )
-    plt.legend(fontsize=20)
-    plt.xticks(fontsize=22)
-    plt.yticks(fontsize=22)
-    plt.xlabel(x_label, fontsize=24)
-    plt.ylabel(y_label, fontsize=24)
-    plt.grid(alpha=0.3)
-    plt.tight_layout()
-    plt.savefig(save_path)
-    plt.close()
-
-def save_inversion_stats(
-    enc_dec_img_ssim, enc_dec_img_lpips, enc_dec_img_mse, enc_dec_img_psnr,
-    mse_array, lpips_array, ssim_array, exp_name, model_type, eta,
-    max_iterations, src_guidance_scale, len_dataset_configs
-):
-    enc_dec_img_ssim /= len_dataset_configs
-    enc_dec_img_lpips /= len_dataset_configs
-    enc_dec_img_mse /= len_dataset_configs
-    enc_dec_img_psnr /= len_dataset_configs
-    # save to txt
-    results_dir = f"saved_info/{exp_name}/{model_type}/eta={eta}/results"
-    os.makedirs(results_dir, exist_ok=True)
-    with open(f"{results_dir}/enc_dec_results.txt", "a") as f:
-        f.write(f"Exp name: {exp_name}\n")
-        f.write(f"Avg Enc-Dec SSIM: {enc_dec_img_ssim:.8f}\n")
-        f.write(f"Avg Enc-Dec LPIPS: {enc_dec_img_lpips:.8f}\n")
-        f.write(f"Avg Enc-Dec MSE: {enc_dec_img_mse:.8f}\n")
-        f.write(f"Avg Enc-Dec PSNR: {enc_dec_img_psnr:.8f}\n")
-        f.write("\n")
-
-    # save arrays
-    psnr_array = 20 * np.log10(255 / np.sqrt(mse_array))
-    np.save(f"{results_dir}/inversion_psnr.npy", psnr_array)
-    np.save(f"{results_dir}/inversion_mse.npy", mse_array)
-    np.save(f"{results_dir}/inversion_lpips.npy", lpips_array)
-    np.save(f"{results_dir}/inversion_ssim.npy", ssim_array)
-
-    psnr_array = np.mean(psnr_array, axis=0)
-    rmse_array = np.sqrt(np.mean(mse_array, axis=0))
-    lpips_array = np.mean(lpips_array, axis=0)
-    ssim_array = np.mean(ssim_array, axis=0)
-
-    # plot graphs
-    plot_graph(
-        psnr_array, "FlowOpt Iteration", "PSNR",
-        os.path.join(results_dir, f"psnr_vs_iterations_flowopt_iterations_{max_iterations}_cfg={src_guidance_scale}.png"),
-        h_line=enc_dec_img_psnr,
-    )
-    plot_graph(
-        rmse_array, "FlowOpt Iteration", "RMSE",
-        os.path.join(results_dir, f"rmse_vs_iterations_flowopt_iterations_{max_iterations}_cfg={src_guidance_scale}.png"),
-        h_line=np.sqrt(enc_dec_img_mse),
-    )
-    plot_graph(
-        lpips_array, "FlowOpt Iteration", "LPIPS",
-        os.path.join(results_dir, f"lpips_vs_iterations_flowopt_iterations_{max_iterations}_cfg={src_guidance_scale}.png"),
-        h_line=enc_dec_img_lpips,
-    )
-    plot_graph(
-        ssim_array, "FlowOpt Iteration", "SSIM",
-        os.path.join(results_dir, f"ssim_vs_iterations_flowopt_iterations_{max_iterations}_cfg={src_guidance_scale}.png"),
-        h_line=enc_dec_img_ssim,
-    )
-
 @torch.no_grad()
-def run_script(args):
+def run_script(args: argparse.Namespace) -> None:
+    """
+    Run the main script for image inversion and editing using FLUX/SD3 models.
+
+    Args:
+        args (argparse.Namespace): Command line arguments containing device number and experiment YAML file path.
+    """
     device = torch.device(f"cuda:{args.device_num}" if torch.cuda.is_available() else "cpu")
     exp_yaml = args.exp_yaml
     with open(exp_yaml) as file:
