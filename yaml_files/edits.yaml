@@ -115,7 +115,7 @@
     - 1_wooden_sculpture
 
 -
-    init_img:  new_data/cow_grass2.png
+    init_img:  dataset/cow_grass2.png
 
     source_prompt: A large brown and white cow standing in a grassy
         field. The cow is positioned towards the center of the scene.

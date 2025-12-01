@@ -139,17 +139,23 @@ def run_script(args: argparse.Namespace) -> None:
                     for tar_idx, tar_prompt in enumerate(tar_prompts):
                         tar_prompt_txt = str(tar_idx)
                         if model_type == 'FLUX':
-                            flux_editing(
+                            result = flux_editing(
                                 pipe, scheduler, T_steps, n_max, x0_src, src_prompt, tar_prompt,
                                 src_guidance_scale, tar_guidance_scale, max_iterations, eta,
                                 exp_name, src_prompt_txt, tar_prompt_txt,
                             )
+                            if result is not None:
+                                for _ in result:
+                                    pass
                         else:  # SD3
-                            sd3_editing(
+                            result = sd3_editing(
                                 pipe, scheduler, T_steps, n_max, x0_src, src_prompt, tar_prompt, negative_prompt,
                                 src_guidance_scale, tar_guidance_scale, max_iterations, eta,
                                 exp_name, src_prompt_txt, tar_prompt_txt,
                             )
+                            if result is not None:
+                                for _ in result:
+                                    pass
                         pbar.update(1)
 
             if inversion_exp:
