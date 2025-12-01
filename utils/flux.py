@@ -408,8 +408,9 @@ def flux_editing(
     pipe: FluxPipeline, scheduler: FlowMatchEulerDiscreteScheduler,
     T_steps: int, n_max: int, x0_src: torch.Tensor, src_prompt: str,
     tar_prompt: str, src_guidance_scale: float, tar_guidance_scale: float,
-    flowopt_iterations: int, eta: float, exp_name: str, src_prompt_txt: str,
-    tar_prompt_txt: str, gradio_app: bool = False,
+    flowopt_iterations: int, eta: float, exp_name: str = "",
+    src_prompt_txt: str = "", tar_prompt_txt: str = "",
+    gradio_app: bool = False,
 ) -> Optional[Iterator[List[Tuple[Image.Image, str]]]]:
     """
     Perform the editing process for FLUX using FlowOpt.

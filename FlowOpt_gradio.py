@@ -188,7 +188,7 @@ with gr.Blocks(css=css) as demo:
 
         with gr.Row():
             with gr.Column():
-                image_src = gr.Image(type="filepath", label="Source Image", value="inputs/corgi_walking.png",)
+                image_src = gr.Image(type="filepath", label="Source Image", value="gradio_examples/inputs/corgi_walking.png",)
                 src_prompt = gr.Textbox(lines=2, label="Source Prompt", value="A cute brown and white dog walking on a sidewalk near a body of water. The dog is wearing a pink vest, adding a touch of color to the scene.")
                 tar_prompt = gr.Textbox(lines=2, label="Target Prompt", value="A cute brown and white dog walking on a sidewalk near a body of water. The dog is wearing a pink vest, adding a touch of color to the scene. The dog and sidewalk are constructed entirely out of Lego bricks, showcasing a blocky and geometric appearance.")
                 submit_button = gr.Button("Run FlowOpt", variant="primary")

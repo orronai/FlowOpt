@@ -301,7 +301,7 @@ def sd3_editing(
     T_steps: int, n_max: int, x0_src: torch.Tensor, src_prompt: str,
     tar_prompt: str, negative_prompt: str, src_guidance_scale: float,
     tar_guidance_scale: float, flowopt_iterations: int, eta: float,
-    exp_name: str, src_prompt_txt: str, tar_prompt_txt: str,
+    exp_name: str = "", src_prompt_txt: str = "", tar_prompt_txt: str = "",
     gradio_app: bool = False,
 ) -> Optional[Iterator[List[Tuple[Image.Image, str]]]]:
     """
