@@ -88,7 +88,7 @@ If you use this code for your research, please cite our paper:
 ```
 @article{ronai2025flowopt,
 	title={FlowOpt: Fast Optimization Through Whole Flow Processes for Training-Free Editing},
-	author={Ronai, Or and Kulikov, Vladimir, and Michaeli, Tomer},
+	author={Ronai, Or and Kulikov, Vladimir and Michaeli, Tomer},
 	journal={arXiv preprint arXiv:2510.22010},
 	year={2025}
 }
